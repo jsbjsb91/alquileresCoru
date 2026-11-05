@@ -32,7 +32,7 @@ jobs:
 
       - name: Reentrenar modelo de Machine Learning con nuevos datos
         run: |
-          python -c "from backend.ml_model import train_model; train_model()"
+          python -c "from backend.ml_model import train_and_save_model; train_and_save_model()"
 
       - name: Hacer commit y push si hay cambios
         run: |

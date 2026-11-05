@@ -281,3 +281,7 @@ def predict_valuation(
 
 if __name__ == "__main__":
     train_and_save_model()
+
+
+# Alias
+train_model = train_and_save_model

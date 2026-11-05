@@ -1,326 +1,268 @@
-"""
-Scraper de Anuncios Reales de Alquiler en A Coruña Capital
-Fuente: pisos.com (anuncios públicos reales con fotos, precios y enlaces)
-"""
-
 import sys
 import re
 import time
 import json
-import random
 import httpx
 from bs4 import BeautifulSoup
 import pandas as pd
 from pathlib import Path
 
-# Configurar salida UTF-8 para consola Windows
+# Configurar salida UTF-8
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# Cargar configuración de barrios
-CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "barrios_coruna.json"
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "processed"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
+CONFIG_PATH = Path("config/barrios_coruna.json")
 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-    CONFIG_BARRIOS = json.load(f)["neighborhoods"]
+    CONFIG_DATA = json.load(f)
+    CONFIG_BARRIOS = CONFIG_DATA["neighborhoods"]
 
-NEIGHBORHOOD_MAPPING = {
-    "cidade vella": "ciudad_vieja",
-    "ciudad vieja": "ciudad_vieja",
-    "atochas": "monte_alto",
-    "monte alto": "monte_alto",
-    "zalaeta": "monte_alto",
-    "torre": "monte_alto",
-    "pescaderia": "pescaderia_ensanche",
-    "pescadería": "pescaderia_ensanche",
-    "ensanche": "pescaderia_ensanche",
-    "cantones": "pescaderia_ensanche",
-    "plaza de lugo": "pescaderia_ensanche",
-    "plaza de pontevedra": "pescaderia_ensanche",
-    "juan florez": "pescaderia_ensanche",
-    "juan flórez": "pescaderia_ensanche",
-    "riazor": "riazor_ciudad_jardin",
-    "ciudad jardin": "riazor_ciudad_jardin",
-    "ciudad jardín": "riazor_ciudad_jardin",
-    "catro camiños": "cuatro_caminos",
-    "cuatro caminos": "cuatro_caminos",
-    "gaiteira": "cuatro_caminos",
-    "nuevos ministerios": "cuatro_caminos",
-    "mallos": "los_mallos",
-    "sagrada familia": "los_mallos",
-    "estacion": "los_mallos",
-    "estación": "los_mallos",
-    "agra": "agragra_orzan",
-    "orzan": "agragra_orzan",
-    "orzán": "agragra_orzan",
-    "san pedro de visma": "agragra_orzan",
-    "ventorrillo": "agragra_orzan",
-    "matogrande": "matogrande_someso",
-    "someso": "matogrande_someso",
-    "eiris": "matogrande_someso",
-    "eirís": "matogrande_someso",
-    "castros": "castros_castrillon",
-    "castrillon": "castros_castrillon",
-    "castrillón": "castros_castrillon",
-    "monelos": "castros_castrillon",
-    "mesoiro": "mesoiro_pocomaco",
-    "feans": "mesoiro_pocomaco",
-    "feáns": "mesoiro_pocomaco",
-    "vioño": "mesoiro_pocomaco",
-    "rosales": "riazor_ciudad_jardin",
-    "labañou": "riazor_ciudad_jardin",
-        "somorrostro": "pescaderia_ensanche",
-    "oleiros": "oleiros",
-    "santa cruz": "oleiros",
-    "perillo": "oleiros",
-    "mera": "oleiros",
-    "bastiagueiro": "oleiros",
-    "dorneda": "oleiros",
-    "lorbe": "oleiros",
-    "lorbé": "oleiros",
-    "dexo": "oleiros",
-    "inas": "oleiros",
-    "iñás": "oleiros",
-    "culleredo": "culleredo",
-    "o burgo": "culleredo",
-    "burgo": "culleredo",
-    "vilaboa": "culleredo",
-    "acea de ama": "culleredo",
-    "acea": "culleredo",
-    "almeiras": "culleredo",
-    "arteixo": "arteixo",
-    "meicende": "arteixo",
-    "pastoriza": "arteixo",
-    "sabon": "arteixo",
-    "sabón": "arteixo",
-    "vilarrodis": "arteixo",
-    "vilarrodís": "arteixo",
-    "cambre": "cambre",
-    "o temple": "cambre",
-    "temple": "cambre",
-    "graxal": "cambre",
-    "sigras": "cambre",
-    "sigrás": "cambre",
-    "cecebre": "cambre",
-    "sada": "sada",
-    "fontan": "sada",
-    "fontán": "sada",
-    "carnoedo": "sada",
-    "veigue": "sada",
-    "mosteiron": "sada",
-    "mosteirón": "sada",
+URBAN_NEIGHBORHOODS = [nb for nb in CONFIG_BARRIOS if nb.get("zone_type") == "city"]
+
+def get_nearest_urban_neighborhood(lat, lon):
+    best_nb = URBAN_NEIGHBORHOODS[0]
+    min_dist = float("inf")
+    for nb in URBAN_NEIGHBORHOODS:
+        d = (lat - nb["lat"])**2 + (lon - nb["lon"])**2
+        if d < min_dist:
+            min_dist = d
+            best_nb = nb
+    return best_nb
+
+def determine_municipality(lat, lon, text):
+    t = text.lower()
+    if "oleiros" in t or "santa cruz" in t or "perillo" in t or "mera" in t or "bastiagueiro" in t or "dorneda" in t:
+        return "Oleiros"
+    if "culleredo" in t or "o burgo" in t or "vilaboa" in t or "almeiras" in t or "acea de ama" in t:
+        return "Culleredo"
+    if "arteixo" in t or "meicende" in t or "pastoriza" in t or "sabón" in t or "vilarrodís" in t:
+        return "Arteixo"
+    if "cambre" in t or "o temple" in t or "graxal" in t or "sigrás" in t:
+        return "Cambre"
+    if "sada" in t or "fontán" in t or "carnoedo" in t or "veigue" in t:
+        return "Sada"
+    
+    # Geográfico por coordenadas
+    if lon < -8.455 and lat < 43.345:
+        return "Arteixo"
+    if lon > -8.365 and lat > 43.325:
+        return "Oleiros"
+    if lon > -8.290:
+        return "Sada"
+    if lat < 43.328 and -8.420 <= lon <= -8.355:
+        return "Culleredo"
+    if lat < 43.305 and -8.365 <= lon <= -8.320:
+        return "Cambre"
+        
+    return "A Coruña"
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
 }
 
-def map_to_neighborhood(location_text: str):
-    loc_lower = location_text.lower()
-    for key, n_id in NEIGHBORHOOD_MAPPING.items():
-        if key in loc_lower:
-            # Encontrar datos del barrio
-            for nb in CONFIG_BARRIOS:
-                if nb["id"] == n_id:
-                    return nb
-    # Por defecto Cuatro Caminos / Centro
-    return CONFIG_BARRIOS[4]
+client = httpx.Client(headers=headers, follow_redirects=True, timeout=20.0)
 
-def scrape_real_apartments():
-    targets = [
-        {"url_base": "https://www.pisos.com/alquiler/pisos-a_coruna_capital/", "max_pages": 4, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/aticos-a_coruna_capital/", "max_pages": 2, "filter_area": False, "type": "atico"},
-        {"url_base": "https://www.pisos.com/alquiler/duplexs-a_coruna_capital/", "max_pages": 2, "filter_area": False, "type": "duplex"},
-        {"url_base": "https://www.pisos.com/alquiler/estudios-a_coruna_capital/", "max_pages": 2, "filter_area": False, "type": "estudio"},
-        {"url_base": "https://www.pisos.com/alquiler/casas-a_coruna_capital/", "max_pages": 2, "filter_area": False, "type": "casa"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-oleiros/", "max_pages": 3, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-culleredo/", "max_pages": 3, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-arteixo/", "max_pages": 2, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-cambre/", "max_pages": 3, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-sada/", "max_pages": 3, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-area_de_a_coruna/", "max_pages": 3, "filter_area": False, "type": "piso"},
-        {"url_base": "https://www.pisos.com/alquiler/pisos-a_coruna/", "max_pages": 4, "filter_area": True, "type": "piso"},
-    ]
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-        "Referer": "https://www.google.com/",
-    }
+# URLs a consultar
+urls_to_scrape = [
+    # Distritos urbanos de A Coruña
+    ("https://www.pisos.com/alquiler/pisos-cidade_vella_atochas_pescaderia/", "A Coruña", "pescaderia_ensanche", "Pescadería - Ensanche - Ciudad Vieja"),
+    ("https://www.pisos.com/alquiler/pisos-cidade_xardin_cidade_escolar/", "A Coruña", "riazor_ciudad_jardin", "Ciudad Jardín - Riazor"),
+    ("https://www.pisos.com/alquiler/pisos-labanou_os_rosales/", "A Coruña", "riazor_ciudad_jardin", "Los Rosales - Labañou"),
+    ("https://www.pisos.com/alquiler/pisos-catro_caminos_a_gaiteira/", "A Coruña", "cuatro_caminos", "Cuatro Caminos - A Gaiteira"),
+    ("https://www.pisos.com/alquiler/pisos-os_mallos_a_falperra/", "A Coruña", "los_mallos", "Los Mallos - A Falperra"),
+    ("https://www.pisos.com/alquiler/pisos-agra_do_orzan_o_ventorillo/", "A Coruña", "agras_del_orzán", "Agra do Orzán - Ventorrillo"),
+    ("https://www.pisos.com/alquiler/pisos-elvina_barrio_flores_matogrande_someso/", "A Coruña", "matogrande", "Matogrande - Elviña - Someso"),
+    ("https://www.pisos.com/alquiler/pisos-os_castros_castrillon_monelos/", "A Coruña", "castros_castrillon", "Os Castros - Castrillón - Monelos"),
+    # Tipologías en Coruña Capital
+    ("https://www.pisos.com/alquiler/aticos-a_coruna_capital/", "A Coruña", None, None),
+    ("https://www.pisos.com/alquiler/duplexs-a_coruna_capital/", "A Coruña", None, None),
+    ("https://www.pisos.com/alquiler/estudios-a_coruna_capital/", "A Coruña", None, None),
+    ("https://www.pisos.com/alquiler/casas-a_coruna_capital/", "A Coruña", None, None),
+    ("https://www.pisos.com/alquiler/pisos-a_coruna_capital/", "A Coruña", None, None),
+    # Concellos Metropolitanos
+    ("https://www.pisos.com/alquiler/pisos-oleiros/", "Oleiros", "oleiros", "Concello de Oleiros"),
+    ("https://www.pisos.com/alquiler/casas-oleiros/", "Oleiros", "oleiros", "Concello de Oleiros"),
+    ("https://www.pisos.com/alquiler/pisos-culleredo/", "Culleredo", "culleredo", "Concello de Culleredo"),
+    ("https://www.pisos.com/alquiler/pisos-arteixo/", "Arteixo", "arteixo", "Concello de Arteixo"),
+    ("https://www.pisos.com/alquiler/pisos-cambre/", "Cambre", "cambre", "Concello de Cambre"),
+    ("https://www.pisos.com/alquiler/pisos-sada/", "Sada", "sada", "Concello de Sada"),
+    ("https://www.pisos.com/alquiler/pisos-area_de_a_coruna/", "Área Metropolitana", None, None),
+]
 
-    client = httpx.Client(headers=headers, follow_redirects=True, timeout=20.0)
-    all_properties = []
-    seen_ids = set()
+all_properties = []
+seen_ids = set()
 
-    print(f"🚀 Iniciando extracción de anuncios REALES en A Coruña y área metropolitana...")
+print("🚀 Extrayendo pisos con coordenadas EXACTAS de JSON-LD...")
 
-    ALLOWED_AREAS = [
-        "a coruña", "coruña", "oleiros", "culleredo", "arteixo", "cambre", "sada", "santa cruz",
-        "perillo", "o burgo", "monelos", "matogrande", "castros", "riazor", "monte alto",
-        "ensanche", "pescadería", "ciudad vieja", "cuatro caminos", "los mallos", "agra do orzán",
-        "los rosales", "novo mesoiro", "someso", "eirís", "visma", "ventorrillo"
-    ]
+for item_info in urls_to_scrape:
+    url, default_muni, default_nb_id, default_nb_name = item_info
+    print(f" -> Consultando {url}...")
+    try:
+        resp = client.get(url)
+        if resp.status_code != 200:
+            continue
+        soup = BeautifulSoup(resp.text, "html.parser")
 
-    for target in targets:
-        base_url = target["url_base"]
-        max_pages = target["max_pages"]
-        filter_area = target["filter_area"]
-
-        for page in range(1, max_pages + 1):
-            url = base_url if page == 1 else f"{base_url}{page}/"
-            print(f"📄 Scrapeando página {page}: {url}")
-
+        # Extraer coordenadas reales de JSON-LD
+        geo_map = {}
+        for s in soup.find_all("script", type="application/ld+json"):
             try:
-                resp = client.get(url)
-                if resp.status_code != 200:
-                    print(f"⚠️ Status {resp.status_code} en página {page}, pasando al siguiente.")
-                    break
+                data = json.loads(s.string)
+                if isinstance(data, dict):
+                    ad_url_part = data.get("url", "").rstrip("/")
+                    geo = data.get("geo", {})
+                    if ad_url_part and geo:
+                        lat_val = float(geo.get("latitude", 0))
+                        lon_val = float(geo.get("longitude", 0))
+                        # Validar que caen dentro del área metropolitana de A Coruña y comarca
+                        if 43.20 <= lat_val <= 43.45 and -8.60 <= lon_val <= -8.20:
+                            geo_map[ad_url_part] = (round(lat_val, 6), round(lon_val, 6))
+            except Exception:
+                pass
 
-                soup = BeautifulSoup(resp.text, "html.parser")
-                cards = soup.select(".ad-preview")
+        cards = soup.select(".ad-preview")
+        for card in cards:
+            ad_id = card.get("id")
+            if not ad_id or ad_id in seen_ids:
+                continue
 
-                if not cards:
-                    print(f"ℹ️ No se encontraron más tarjetas en página {page}.")
-                    break
+            title_elem = card.select_one(".ad-preview__title")
+            if not title_elem:
+                continue
+            title = title_elem.get_text(strip=True)
+            ad_url_part = title_elem.get("href", "")
+            ad_url = f"https://www.pisos.com{ad_url_part}" if ad_url_part.startswith("/") else ad_url_part
 
-                for card in cards:
-                    try:
-                        # ID
-                        ad_id = card.get("id") or card.get("data-lnk-href", "")
-                        if not ad_id or ad_id in seen_ids:
-                            continue
+            # Coordenadas exactas desde el JSON-LD
+            clean_key = ad_url_part.rstrip("/")
+            exact_geo = geo_map.get(clean_key)
+            if not exact_geo:
+                # Solo aceptar anuncios con coordenadas exactas verificadas
+                continue
 
-                        # Título y Link
-                        title_elem = card.select_one(".ad-preview__title")
-                        if not title_elem:
-                            continue
-                        title = title_elem.get_text(strip=True)
-                        rel_url = title_elem.get("href", "")
-                        ad_url = f"https://www.pisos.com{rel_url}" if rel_url.startswith("/") else rel_url
+            lat, lon = exact_geo
 
-                        # Subtítulo (Ubicación)
-                        subtitle_elem = card.select_one(".ad-preview__subtitle")
-                        subtitle = subtitle_elem.get_text(strip=True) if subtitle_elem else "A Coruña"
+            # Precio
+            price_elem = card.select_one(".ad-preview__price")
+            if not price_elem:
+                continue
+            price_raw = price_elem.get_text(strip=True)
+            price_clean = re.sub(r"[^\d]", "", price_raw)
+            if not price_clean:
+                continue
+            price_month = float(price_clean)
 
-                        full_loc = f"{title} {subtitle}".lower()
-                        if filter_area:
-                            if not any(area in full_loc for area in ALLOWED_AREAS):
-                                continue
+            # Características
+            chars = [c.get_text(strip=True) for c in card.select(".ad-preview__char")]
+            rooms, bathrooms, sqm = 2, 1, 75.0
+            floor_str = "1ª planta"
+            for ch in chars:
+                ch_low = ch.lower()
+                if "hab" in ch_low:
+                    m = re.search(r"(\d+)", ch)
+                    if m: rooms = int(m.group(1))
+                elif "baño" in ch_low or "bano" in ch_low:
+                    m = re.search(r"(\d+)", ch)
+                    if m: bathrooms = int(m.group(1))
+                elif "m²" in ch_low or "m2" in ch_low:
+                    m = re.search(r"(\d+)", ch)
+                    if m: sqm = float(m.group(1))
+                elif "planta" in ch_low or "bajo" in ch_low or "ático" in ch_low:
+                    floor_str = ch
 
-                        seen_ids.add(ad_id)
+            # Subtítulo (zona local o parroquia)
+            subtitle_elem = card.select_one(".ad-preview__location, .ad-preview__subtitle")
+            subtitle = subtitle_elem.get_text(strip=True) if subtitle_elem else ""
 
-                        # Precio
-                        price_elem = card.select_one(".ad-preview__price")
-                        if not price_elem:
-                            continue
-                        price_raw = price_elem.get_text(strip=True)
-                        price_clean = re.sub(r"[^\d]", "", price_raw)
-                        if not price_clean:
-                            continue
-                        price_month = float(price_clean)
+            # Determinar Concello y Barrio con precisión
+            muni = determine_municipality(lat, lon, f"{title} {subtitle} {ad_url_part} {default_muni}")
+            
+            if muni == "A Coruña":
+                if default_nb_id:
+                    nb_id = default_nb_id
+                    nb_name = default_nb_name
+                else:
+                    nearest = get_nearest_urban_neighborhood(lat, lon)
+                    nb_id = nearest["id"]
+                    nb_name = nearest["name"]
+            else:
+                muni_key = muni.lower()
+                nb_id = muni_key
+                nb_name = f"{subtitle} ({muni})" if subtitle and muni not in subtitle else f"Concello de {muni}"
 
-                        # Características (habs, baños, m², planta)
-                        chars = [c.get_text(strip=True) for c in card.select(".ad-preview__char")]
-                        
-                        rooms = 2
-                        bathrooms = 1
-                        sqm = 75.0
-                        floor_str = "1ª planta"
+            # Foto real
+            img_elem = card.select_one("img.lazy-img, img[data-src], .carousel__main-photo img")
+            photo_url = ""
+            if img_elem:
+                photo_url = img_elem.get("data-src") or img_elem.get("src") or ""
 
-                        for ch in chars:
-                            ch_low = ch.lower()
-                            if "hab" in ch_low:
-                                m = re.search(r"(\d+)", ch)
-                                if m:
-                                    rooms = int(m.group(1))
-                            elif "baño" in ch_low or "bano" in ch_low:
-                                m = re.search(r"(\d+)", ch)
-                                if m:
-                                    bathrooms = int(m.group(1))
-                            elif "m²" in ch_low or "m2" in ch_low:
-                                m = re.search(r"(\d+)", ch)
-                                if m:
-                                    sqm = float(m.group(1))
-                            elif "planta" in ch_low or "bajo" in ch_low or "ático" in ch_low:
-                                floor_str = ch
+            desc_text = (card.get_text() + " " + title).lower()
+            has_elevator = "ascensor" in desc_text or "ático" not in floor_str.lower()
+            has_parking = "garaje" in desc_text or "parking" in desc_text
+            is_furnished = "amueblado" in desc_text
 
-                        # Foto
-                        img_elem = card.select_one("img.lazy-img, img[data-src], .carousel__main-photo img")
-                        photo_url = ""
-                        if img_elem:
-                            photo_url = img_elem.get("data-src") or img_elem.get("src") or ""
+            price_sqm = round(price_month / sqm, 2) if sqm > 0 else 0.0
 
-                        # Mapeo a barrio
-                        nb_info = map_to_neighborhood(f"{title} {subtitle}")
+            prop_type = "piso"
+            if "ático" in title.lower() or "atico" in title.lower():
+                prop_type = "atico"
+            elif "dúplex" in title.lower() or "duplex" in title.lower():
+                prop_type = "duplex"
+            elif "estudio" in title.lower():
+                prop_type = "estudio"
+            elif "chalet" in title.lower() or "casa" in title.lower():
+                prop_type = "casa"
 
-                        # Coordenadas con leve jitter realista
-                        jitter_lat = random.gauss(0, 0.0018)
-                        jitter_lon = random.gauss(0, 0.0022)
-                        lat = round(nb_info["lat"] + jitter_lat, 6)
-                        lon = round(nb_info["lon"] + jitter_lon, 6)
+            item = {
+                "id": str(ad_id),
+                "title": title,
+                "subtitle": subtitle,
+                "url": ad_url,
+                "photo_url": photo_url,
+                "municipality": muni,
+                "neighborhood": nb_name,
+                "neighborhood_id": nb_id,
+                "price_month": price_month,
+                "sqm": sqm,
+                "price_sqm": price_sqm,
+                "rooms": rooms,
+                "bathrooms": bathrooms,
+                "floor": floor_str,
+                "has_elevator": has_elevator,
+                "has_parking": has_parking,
+                "is_furnished": is_furnished,
+                "lat": lat,
+                "lon": lon,
+                "property_type": prop_type,
+                "is_real": True,
+                "source": "pisos.com",
+            }
+            all_properties.append(item)
+            seen_ids.add(ad_id)
 
-                        # Características extras
-                        desc_text = (card.get_text() + " " + title).lower()
-                        has_elevator = "ascensor" in desc_text or "ático" not in floor_str.lower()
-                        has_parking = "garaje" in desc_text or "parking" in desc_text
-                        is_furnished = "amueblado" in desc_text
+        time.sleep(0.3)
+    except Exception as e:
+        print(f"Error procesando {url}: {e}")
 
-                        price_sqm = round(price_month / sqm, 2) if sqm > 0 else 0.0
+print(f"\n✅ Total anuncios con geolocalización catastral real exacta: {len(all_properties)}")
 
-                        item = {
-                            "id": str(ad_id),
-                            "title": title,
-                            "subtitle": subtitle,
-                            "url": ad_url,
-                            "photo_url": photo_url,
-                            "neighborhood": nb_info["name"],
-                            "neighborhood_id": nb_info["id"],
-                            "price_month": price_month,
-                            "sqm": sqm,
-                            "price_sqm": price_sqm,
-                            "rooms": rooms,
-                            "bathrooms": bathrooms,
-                            "floor": floor_str,
-                            "has_elevator": has_elevator,
-                            "has_parking": has_parking,
-                            "is_furnished": is_furnished,
-                            "lat": lat,
-                            "lon": lon,
-                            "property_type": target.get("type", "piso"),
-                            "is_real": True,
-                            "source": "pisos.com"
-                        }
-                        all_properties.append(item)
+df = pd.DataFrame(all_properties)
+print("\nDesglose por Concello:")
+print(df["municipality"].value_counts())
 
-                    except Exception as ex:
-                        continue
+print("\nDesglose por Distrito / Barrio:")
+print(df["neighborhood_id"].value_counts())
 
-                print(f"  -> {len(cards)} anuncios leídos en página {page}. Acumulado total: {len(all_properties)}")
-                time.sleep(random.uniform(1.0, 2.0))
+data_dir = Path("data/processed")
+parquet_path = data_dir / "alquileres_coruna_reales.parquet"
+csv_path = data_dir / "alquileres_coruna_reales.csv"
 
-            except Exception as e:
-                print(f"❌ Error en página {page}: {e}")
-                break
+df.to_parquet(parquet_path, index=False)
+df.to_csv(csv_path, index=False, encoding="utf-8")
+print(f" Datasets guardados con éxito en:\n - {parquet_path}\n - {csv_path}")
 
-    df = pd.DataFrame(all_properties)
-    if not df.empty:
-        # Guardar datasets reales
-        csv_path = DATA_DIR / "alquileres_coruna_reales.csv"
-        parquet_path = DATA_DIR / "alquileres_coruna_reales.parquet"
-        df.to_csv(csv_path, index=False, encoding="utf-8")
-        df.to_parquet(parquet_path, index=False)
-
-        print(f"\n✅ Extracción finalizada con éxito!")
-        print(f"📊 Total de anuncios REALES extraídos: {len(df)}")
-        print(f"💰 Precio medio real: {df['price_month'].mean():.1f} €/mes")
-        print(f"📐 Superficie media real: {df['sqm'].mean():.1f} m²")
-        print(f"💶 Precio medio por m² real: {df['price_sqm'].mean():.2f} €/m²")
-        print(f"📁 Guardado en:\n  - {csv_path}\n  - {parquet_path}")
-
-        # Mostrar muestra de anuncios reales
-        print("\n📋 Muestra de primeros 3 anuncios reales:")
-        for _, row in df.head(3).iterrows():
-            print(f"  * [{row['neighborhood']}] {row['title']} -> {row['price_month']} €/mes ({row['sqm']} m², {row['price_sqm']} €/m²)")
-            print(f"    Enlace real: {row['url']}")
-    else:
-        print("⚠️ No se pudieron extraer datos.")
-
-if __name__ == "__main__":
-    scrape_real_apartments()
+fallback_path = Path("frontend/data/properties_fallback.json")
+fallback_records = df.to_dict(orient="records")
+fallback_path.write_text(json.dumps(fallback_records, indent=2, ensure_ascii=False), encoding="utf-8")
+print(f" properties_fallback.json actualizado para Render/Offline.")
