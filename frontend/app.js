@@ -854,6 +854,11 @@ function calculateFallbackValuation(p) {
     sagrada_familia: 11.4,
     elvina: 11.0,
     agras_del_orzán: 10.8,
+    oleiros: 11.5,
+    culleredo: 9.8,
+    cambre: 9.2,
+    arteixo: 8.9,
+    sada: 8.5,
   };
 
   const baseRate = neighborhoodRates[p.neighborhood_id] || 13.5;
@@ -943,6 +948,46 @@ function renderSimulationResult(res) {
     verdictIcon.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6"></i>`;
     verdictTitle.innerText = `Tasación Estimada: ${Math.round(res.predicted_price)} €/mes`;
     verdictDesc.innerHTML = `Introduce un precio ofertado en el formulario para obtener un diagnóstico comparativo inmediato.`;
+  }
+
+  // Update Inquilino Financial Calculator
+  const rentVal = Math.round(res.predicted_price);
+  const totalMonthVal = rentVal + 130;
+  const depositVal = rentVal;
+  const salaryVal = Math.round(totalMonthVal / 0.30);
+
+  const elRent = document.getElementById('sim-calc-rent');
+  const elTotalMonth = document.getElementById('sim-calc-total-month');
+  const elDeposit = document.getElementById('sim-calc-deposit');
+  const elSalary = document.getElementById('sim-calc-salary');
+
+  if (elRent) elRent.innerText = `${rentVal} €/mes`;
+  if (elTotalMonth) elTotalMonth.innerText = `${totalMonthVal} €/mes`;
+  if (elDeposit) elDeposit.innerText = `${depositVal} €`;
+  if (elSalary) elSalary.innerText = `${salaryVal} €/mes`;
+
+  // Update Feature Breakdown
+  const elZone = document.getElementById('sim-factor-zone');
+  const elSqm = document.getElementById('sim-factor-sqm');
+  const elParking = document.getElementById('sim-factor-parking');
+  const elElevator = document.getElementById('sim-factor-elevator');
+
+  const zoneSelect = document.getElementById('sim-neighborhood');
+  if (elZone && zoneSelect) {
+    elZone.innerText = zoneSelect.options[zoneSelect.selectedIndex]?.text.split('(')[0].trim() || 'A Coruña';
+  }
+  if (elSqm) {
+    elSqm.innerText = `${res.sqm || 85} m²`;
+  }
+  if (elParking) {
+    const hasP = document.getElementById('sim-parking')?.checked;
+    elParking.innerText = hasP ? '+85 €/mes' : '+0 €';
+    elParking.className = hasP ? 'text-emerald-400 font-bold' : 'text-slate-400';
+  }
+  if (elElevator) {
+    const hasE = document.getElementById('sim-elevator')?.checked;
+    elElevator.innerText = hasE ? '+7%' : '-5%';
+    elElevator.className = hasE ? 'text-emerald-400 font-bold' : 'text-amber-400';
   }
 
   if (window.lucide) {

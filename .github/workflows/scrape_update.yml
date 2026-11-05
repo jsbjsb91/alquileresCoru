@@ -1,0 +1,42 @@
+name: Actualización Periódica de Alquileres Reales
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 06:00 y a las 18:00 UTC
+    - cron: '0 6,18 * * *'
+  workflow_dispatch: # Permite ejecución manual desde la pestaña Actions en GitHub
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ejecutar scraper de pisos reales
+        run: |
+          python scraper/real_scraper_pisos.py
+
+      - name: Reentrenar modelo de Machine Learning con nuevos datos
+        run: |
+          python -c "from backend.ml_model import train_model; train_model()"
+
+      - name: Hacer commit y push si hay cambios
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add data/processed/ backend/models/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: Actualización periódica de inmuebles reales y modelo ML" && git push)

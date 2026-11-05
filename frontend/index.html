@@ -58,15 +58,19 @@
         <span class="text-slate-300 hidden sm:inline">Anuncios reales extraídos de portales de A Coruña con enlaces directos y fotos</span>
       </div>
       <div class="flex items-center space-x-4 text-slate-300">
+        <a href="/docs" target="_blank" class="hover:text-emerald-400 transition-colors flex items-center gap-1 font-medium text-xs">
+          <i data-lucide="file-code-2" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Swagger API</span>
+        </a>
+        <a href="https://github.com/jsbjsb91/alquileresCoru" target="_blank" class="hover:text-emerald-400 transition-colors flex items-center gap-1 font-medium text-xs">
+          <i data-lucide="github" class="w-3.5 h-3.5 text-slate-300"></i>
+          <span>GitHub</span>
+        </a>
+        <span class="text-slate-600">|</span>
         <div id="api-status-badge" class="flex items-center space-x-1.5 text-xs font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span id="api-status-text">Conectando API...</span>
         </div>
-        <span class="text-slate-600">|</span>
-        <a href="#simulador" class="hover:text-emerald-400 transition-colors flex items-center gap-1 font-medium">
-          <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-          Simulador IA
-        </a>
       </div>
     </div>
   </div>
@@ -268,12 +272,7 @@
             <option value="Oportunidad / Muy buen precio">🌟 Solo Chollos / Oportunidades</option>
             <option value="Precio de mercado">⚖️ Precio Justo de Mercado</option>
             <option value="Sobreprecio">📈 Con Sobreprecio</option>
-                      <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera)</option>
-            <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa)</option>
-            <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza)</option>
-            <option value="cambre">Concello de Cambre (O Temple - El Graxal)</option>
-            <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo)</option>
-          </select>
+</select>
         </div>
 
         <!-- Max Price Filter -->
@@ -330,12 +329,7 @@
               <option value="price_desc">💶 Precio: Mayor a Menor</option>
               <option value="price_sqm_asc">📐 €/m²: Más económico</option>
               <option value="sqm_desc">🏢 Superficie: Mayor a Menor</option>
-                        <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera)</option>
-            <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa)</option>
-            <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza)</option>
-            <option value="cambre">Concello de Cambre (O Temple - El Graxal)</option>
-            <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo)</option>
-          </select>
+</select>
           </div>
 
           <button id="btn-reset-filters" class="px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-1">
@@ -470,12 +464,12 @@
                 <option value="elvina">Elviña - Castro - Flores (~11.0 €/m²)</option>
                 <option value="matogrande">Matogrande - Eirís (~12.8 €/m²)</option>
                 <option value="agras_del_orzán">Agra del Orzán - Ventorrillo (~10.8 €/m²)</option>
-                          <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera)</option>
-            <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa)</option>
-            <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza)</option>
-            <option value="cambre">Concello de Cambre (O Temple - El Graxal)</option>
-            <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo)</option>
-          </select>
+                <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera) (~11.5 €/m²)</option>
+                <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa) (~9.8 €/m²)</option>
+                <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza) (~8.9 €/m²)</option>
+                <option value="cambre">Concello de Cambre (O Temple - El Graxal) (~9.2 €/m²)</option>
+                <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo) (~8.5 €/m²)</option>
+</select>
             </div>
 
             <!-- Superficie & Tipología -->
@@ -496,12 +490,7 @@
                   <option value="atico">Ático con terraza</option>
                   <option value="duplex">Dúplex</option>
                   <option value="estudio">Estudio / Loft</option>
-                            <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera)</option>
-            <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa)</option>
-            <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza)</option>
-            <option value="cambre">Concello de Cambre (O Temple - El Graxal)</option>
-            <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo)</option>
-          </select>
+</select>
               </div>
             </div>
 
@@ -601,18 +590,74 @@
             </div>
 
             <!-- Market Verdict Box -->
-            <div id="sim-verdict-box" class="p-4 rounded-xl border bg-slate-900/60 border-slate-800 text-center">
+            <div id="sim-verdict-box" class="p-4 rounded-xl border bg-slate-900/60 border-slate-800 text-center mb-5">
               <div id="sim-verdict-icon" class="w-10 h-10 rounded-full mx-auto flex items-center justify-center mb-2 bg-slate-800 text-slate-400">
                 <i data-lucide="scale" class="w-5 h-5"></i>
               </div>
               <h5 id="sim-verdict-title" class="text-base font-bold text-white mb-1">Listo para tasar</h5>
               <p id="sim-verdict-desc" class="text-xs text-slate-400">Haz clic en 'Calcular Tasación' o ajusta los parámetros de la vivienda.</p>
             </div>
+
+            <!-- Calculadora Financiera de Coste Real del Inquilino -->
+            <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 mb-5">
+              <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+                <h6 class="text-xs font-bold uppercase tracking-wider text-slate-200">Coste Real Mensual & Desembolso</h6>
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between text-slate-300">
+                  <span>Renta estimada:</span>
+                  <span id="sim-calc-rent" class="font-bold text-white">-- €/mes</span>
+                </div>
+                <div class="flex justify-between text-slate-300">
+                  <span>Suministros est. (Luz, agua, calefacción, wifi):</span>
+                  <span class="font-medium text-slate-400">+130 €/mes</span>
+                </div>
+                <div class="flex justify-between text-emerald-300 pt-1.5 border-t border-slate-800 font-bold">
+                  <span>Gasto total mensual real:</span>
+                  <span id="sim-calc-total-month">-- €/mes</span>
+                </div>
+                <div class="flex justify-between text-amber-300 pt-1 border-t border-slate-800/60">
+                  <span>Fianza inicial recomendada (1 mes):</span>
+                  <span id="sim-calc-deposit">-- €</span>
+                </div>
+                <div class="flex justify-between text-indigo-300">
+                  <span>Salario neto sugerido (Regla 30%):</span>
+                  <span id="sim-calc-salary">-- €/mes</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interpretabilidad ML / Factores de Precio -->
+            <div class="bg-slate-900/60 rounded-xl p-3.5 border border-slate-800/80">
+              <div class="flex items-center gap-1.5 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <i data-lucide="brain-circuit" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span>Factores Clave del Modelo (Interpretabilidad)</span>
+              </div>
+              <div id="sim-feature-breakdown" class="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
+                <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                  <span class="text-slate-400 block text-[10px]">Ubicación</span>
+                  <strong id="sim-factor-zone" class="text-emerald-400">Pescadería</strong>
+                </div>
+                <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                  <span class="text-slate-400 block text-[10px]">Superficie base</span>
+                  <strong id="sim-factor-sqm" class="text-emerald-400">85 m²</strong>
+                </div>
+                <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                  <span class="text-slate-400 block text-[10px]">Impacto Garaje</span>
+                  <strong id="sim-factor-parking" class="text-slate-400">+0 €</strong>
+                </div>
+                <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                  <span class="text-slate-400 block text-[10px]">Impacto Ascensor</span>
+                  <strong id="sim-factor-elevator" class="text-emerald-400">+7%</strong>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-6 pt-4 border-t border-slate-800 text-center">
             <span class="text-[11px] text-slate-500">
-              ⚡ Tasación basada en 850 testigos con corrección geoespacial y atributos físicos.
+              ⚡ Tasación Gradient Boosting basada en testigos reales y calibrados en A Coruña y área metropolitana.
             </span>
           </div>
         </div>
