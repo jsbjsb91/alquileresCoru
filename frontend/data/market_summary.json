@@ -1,0 +1,113 @@
+{
+  "total_properties": 900,
+  "avg_price": 1140.44,
+  "median_price": 1010.0,
+  "min_price": 380.0,
+  "max_price": 5000.0,
+  "avg_price_sqm": 13.31,
+  "median_price_sqm": 12.94,
+  "most_expensive_neighborhoods": [
+    {
+      "neighborhood_id": "pescaderia_ensanche",
+      "neighborhood": "Pescadería - Ensanche - Cantones",
+      "count": 143,
+      "avg_price": 1520.77,
+      "median_price": 1400.0,
+      "min_price": 410.0,
+      "max_price": 3700.0,
+      "avg_price_sqm": 17.29,
+      "median_price_sqm": 17.54,
+      "std_price": 611.0,
+      "avg_sqm": 95.11
+    },
+    {
+      "neighborhood_id": "riazor_ciudad_jardin",
+      "neighborhood": "Riazor - Ciudad Jardín",
+      "count": 114,
+      "avg_price": 1292.89,
+      "median_price": 1170.0,
+      "min_price": 570.0,
+      "max_price": 2960.0,
+      "avg_price_sqm": 15.69,
+      "median_price_sqm": 15.51,
+      "std_price": 495.1,
+      "avg_sqm": 85.56
+    },
+    {
+      "neighborhood_id": "ciudad_vieja",
+      "neighborhood": "Ciudad Vieja",
+      "count": 23,
+      "avg_price": 1216.96,
+      "median_price": 1000.0,
+      "min_price": 600.0,
+      "max_price": 2500.0,
+      "avg_price_sqm": 14.93,
+      "median_price_sqm": 14.62,
+      "std_price": 550.84,
+      "avg_sqm": 82.74
+    }
+  ],
+  "cheapest_neighborhoods": [
+    {
+      "neighborhood_id": "agragra_orzan",
+      "neighborhood": "Agra do Orzán - San Pedro de Visma",
+      "count": 130,
+      "avg_price": 820.54,
+      "median_price": 725.0,
+      "min_price": 380.0,
+      "max_price": 2040.0,
+      "avg_price_sqm": 9.59,
+      "median_price_sqm": 9.58,
+      "std_price": 346.59,
+      "avg_sqm": 88.18
+    },
+    {
+      "neighborhood_id": "mesoiro_pocomaco",
+      "neighborhood": "Novo Mesoiro - Feáns - Vioño",
+      "count": 49,
+      "avg_price": 900.82,
+      "median_price": 820.0,
+      "min_price": 490.0,
+      "max_price": 1810.0,
+      "avg_price_sqm": 10.35,
+      "median_price_sqm": 10.18,
+      "std_price": 294.41,
+      "avg_sqm": 89.92
+    },
+    {
+      "neighborhood_id": "castros_castrillon",
+      "neighborhood": "Os Castros - Castrillón",
+      "count": 58,
+      "avg_price": 859.31,
+      "median_price": 735.0,
+      "min_price": 390.0,
+      "max_price": 2400.0,
+      "avg_price_sqm": 10.42,
+      "median_price_sqm": 10.3,
+      "std_price": 442.96,
+      "avg_sqm": 83.17
+    }
+  ],
+  "property_type_distribution": {
+    "piso": 663,
+    "apartamento": 123,
+    "estudio": 61,
+    "duplex": 38,
+    "atico": 15
+  },
+  "amenities_pct": {
+    "pct_elevator": 80.22,
+    "pct_parking": 33.78,
+    "pct_furnished": 65.78,
+    "pct_exterior": 84.89
+  },
+  "model_metrics": {
+    "r2": 0.9381,
+    "mae": 102.94,
+    "rmse": 144.22,
+    "train_samples": 671,
+    "test_samples": 168,
+    "total_samples": 839,
+    "model_type": "GradientBoostingRegressor (scikit-learn)"
+  }
+}

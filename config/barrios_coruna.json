@@ -1,0 +1,90 @@
+{
+  "city": "A Coruña",
+  "province": "A Coruña",
+  "coordinates_center": {
+    "lat": 43.3623,
+    "lon": -8.4115
+  },
+  "neighborhoods": [
+    {
+      "id": "ciudad_vieja",
+      "name": "Ciudad Vieja",
+      "lat": 43.3712,
+      "lon": -8.3935,
+      "typical_price_sqm_min": 11.0,
+      "typical_price_sqm_max": 16.5
+    },
+    {
+      "id": "monte_alto",
+      "name": "Monte Alto - Zalaeta - Torre",
+      "lat": 43.3800,
+      "lon": -8.4020,
+      "typical_price_sqm_min": 9.5,
+      "typical_price_sqm_max": 14.0
+    },
+    {
+      "id": "pescaderia_ensanche",
+      "name": "Pescadería - Ensanche - Cantones",
+      "lat": 43.3685,
+      "lon": -8.4050,
+      "typical_price_sqm_min": 12.0,
+      "typical_price_sqm_max": 18.0
+    },
+    {
+      "id": "riazor_ciudad_jardin",
+      "name": "Riazor - Ciudad Jardín",
+      "lat": 43.3670,
+      "lon": -8.4170,
+      "typical_price_sqm_min": 10.5,
+      "typical_price_sqm_max": 16.0
+    },
+    {
+      "id": "cuatro_caminos",
+      "name": "Cuatro Caminos - Nuevos Ministerios",
+      "lat": 43.3575,
+      "lon": -8.4050,
+      "typical_price_sqm_min": 9.5,
+      "typical_price_sqm_max": 14.5
+    },
+    {
+      "id": "los_mallos",
+      "name": "Los Mallos - Sagrada Familia",
+      "lat": 43.3540,
+      "lon": -8.4160,
+      "typical_price_sqm_min": 7.5,
+      "typical_price_sqm_max": 11.5
+    },
+    {
+      "id": "agragra_orzan",
+      "name": "Agra do Orzán - San Pedro de Visma",
+      "lat": 43.3640,
+      "lon": -8.4230,
+      "typical_price_sqm_min": 7.0,
+      "typical_price_sqm_max": 10.5
+    },
+    {
+      "id": "matogrande_someso",
+      "name": "Matogrande - Someso - Eirís",
+      "lat": 43.3440,
+      "lon": -8.4030,
+      "typical_price_sqm_min": 9.0,
+      "typical_price_sqm_max": 13.5
+    },
+    {
+      "id": "castros_castrillon",
+      "name": "Os Castros - Castrillón",
+      "lat": 43.3510,
+      "lon": -8.3960,
+      "typical_price_sqm_min": 7.5,
+      "typical_price_sqm_max": 11.0
+    },
+    {
+      "id": "mesoiro_pocomaco",
+      "name": "Novo Mesoiro - Feáns - Vioño",
+      "lat": 43.3320,
+      "lon": -8.4280,
+      "typical_price_sqm_min": 7.0,
+      "typical_price_sqm_max": 10.0
+    }
+  ]
+}

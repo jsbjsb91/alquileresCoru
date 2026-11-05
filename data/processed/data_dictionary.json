@@ -1,0 +1,131 @@
+{
+  "dataset_name": "alquileres_coruna",
+  "city": "A Coruña",
+  "country": "Spain",
+  "total_records": 850,
+  "generated_at": "2026-11-05T21:45:37.229093+00:00",
+  "description": "Dataset de oferta de alquiler de viviendas en la ciudad de A Coruña con correlaciones realistas de mercado, precios/m², comodidades y localización.",
+  "fields": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único de la oferta (UUID con prefijo coruna-alq-)",
+      "example": "coruna-alq-0001-ce4fd8"
+    },
+    "title": {
+      "type": "string",
+      "description": "Título descriptivo y comercial del inmueble",
+      "example": "Piso completamente amueblado a estrenar en Pescadería"
+    },
+    "neighborhood": {
+      "type": "string",
+      "description": "Nombre oficial/habitual del barrio o zona",
+      "example": "Pescadería - Ensanche - Cantones"
+    },
+    "neighborhood_id": {
+      "type": "string",
+      "description": "Clave única identificadora del barrio (slug)",
+      "example": "pescaderia_ensanche"
+    },
+    "price_month": {
+      "type": "integer",
+      "unit": "EUR/mes",
+      "description": "Renta mensual de alquiler en euros",
+      "range": [
+        380,
+        3700
+      ]
+    },
+    "sqm": {
+      "type": "integer",
+      "unit": "m²",
+      "description": "Superficie construida/útil de la vivienda",
+      "range": [
+        35,
+        220
+      ]
+    },
+    "rooms": {
+      "type": "integer",
+      "description": "Número de dormitorios / habitaciones",
+      "range": [
+        1,
+        5
+      ]
+    },
+    "bathrooms": {
+      "type": "integer",
+      "description": "Número de cuartos de baño completos o aseos",
+      "range": [
+        1,
+        3
+      ]
+    },
+    "floor": {
+      "type": "string",
+      "description": "Planta en la que se encuentra la vivienda ('Bajo', '1'-'10', 'Ático')",
+      "example": "3"
+    },
+    "has_elevator": {
+      "type": "boolean",
+      "description": "Indica si el edificio dispone de ascensor",
+      "example": true
+    },
+    "is_exterior": {
+      "type": "boolean",
+      "description": "Indica si la vivienda da al exterior o a patio de manzana/luces",
+      "example": true
+    },
+    "furnished": {
+      "type": "boolean",
+      "description": "Indica si la vivienda se alquila amueblada",
+      "example": true
+    },
+    "has_parking": {
+      "type": "boolean",
+      "description": "Indica si incluye plaza de garaje en el precio",
+      "example": false
+    },
+    "lat": {
+      "type": "float",
+      "unit": "degrees",
+      "description": "Latitud geográfica WGS84 del inmueble (con dispersión gaussiana)",
+      "range": [
+        43.32786,
+        43.385897
+      ]
+    },
+    "lon": {
+      "type": "float",
+      "unit": "degrees",
+      "description": "Longitud geográfica WGS84 del inmueble (con dispersión gaussiana)",
+      "range": [
+        -8.434197,
+        -8.388071
+      ]
+    },
+    "price_sqm": {
+      "type": "float",
+      "unit": "EUR/m²",
+      "description": "Precio unitario por metro cuadrado calculado (price_month / sqm)",
+      "range": [
+        6.04,
+        26.03
+      ]
+    },
+    "is_outlier": {
+      "type": "boolean",
+      "description": "Bandera que indica si el registro simula una anomalía o inmueble singular de mercado",
+      "example": false
+    },
+    "property_type": {
+      "type": "string",
+      "description": "Tipología de vivienda (estudio, apartamento, piso, duplex, atico)",
+      "example": "piso"
+    },
+    "created_at": {
+      "type": "string (ISO 8601)",
+      "description": "Fecha y hora de publicación de la oferta",
+      "example": "2026-10-23T09:29:36.872657+00:00"
+    }
+  }
+}

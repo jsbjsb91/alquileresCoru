@@ -1,0 +1,1270 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "A Coruña Real Estate & Rental Valuation API",
+    "description": "API analítica y predictiva del mercado del alquiler en la ciudad de A Coruña. Permite consultar ofertas reales/sintetizadas, estadísticas por barrio, resumen de mercado y simulación de precios con algoritmos de Machine Learning.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Estado de salud de la API y versión del modelo",
+        "operationId": "health_check_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/neighborhoods": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Listado de barrios disponibles con su slug y nombre",
+        "operationId": "list_neighborhoods_api_v1_neighborhoods_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response List Neighborhoods Api V1 Neighborhoods Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties": {
+      "get": {
+        "tags": [
+          "Properties"
+        ],
+        "summary": "Consulta de listado de viviendas con filtrado y paginación",
+        "operationId": "get_properties_api_v1_properties_get",
+        "parameters": [
+          {
+            "name": "neighborhood_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtrar por slug de barrio",
+              "title": "Neighborhood Id"
+            },
+            "description": "Filtrar por slug de barrio"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Precio mínimo mensual (€)",
+              "title": "Min Price"
+            },
+            "description": "Precio mínimo mensual (€)"
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Precio máximo mensual (€)",
+              "title": "Max Price"
+            },
+            "description": "Precio máximo mensual (€)"
+          },
+          {
+            "name": "min_sqm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Superficie mínima en m²",
+              "title": "Min Sqm"
+            },
+            "description": "Superficie mínima en m²"
+          },
+          {
+            "name": "max_sqm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 10
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Superficie máxima en m²",
+              "title": "Max Sqm"
+            },
+            "description": "Superficie máxima en m²"
+          },
+          {
+            "name": "rooms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Número exacto de habitaciones",
+              "title": "Rooms"
+            },
+            "description": "Número exacto de habitaciones"
+          },
+          {
+            "name": "min_rooms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Mínimo de habitaciones",
+              "title": "Min Rooms"
+            },
+            "description": "Mínimo de habitaciones"
+          },
+          {
+            "name": "bathrooms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Mínimo de baños",
+              "title": "Bathrooms"
+            },
+            "description": "Mínimo de baños"
+          },
+          {
+            "name": "has_elevator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Dispone de ascensor",
+              "title": "Has Elevator"
+            },
+            "description": "Dispone de ascensor"
+          },
+          {
+            "name": "has_parking",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Dispone de plaza de garaje",
+              "title": "Has Parking"
+            },
+            "description": "Dispone de plaza de garaje"
+          },
+          {
+            "name": "furnished",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Amueblado",
+              "title": "Furnished"
+            },
+            "description": "Amueblado"
+          },
+          {
+            "name": "property_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tipo de inmueble (piso, apartamento, duplex, atico, estudio)",
+              "title": "Property Type"
+            },
+            "description": "Tipo de inmueble (piso, apartamento, duplex, atico, estudio)"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Criterio de orden: price_asc, price_desc, sqm_asc, sqm_desc, price_sqm_asc, price_sqm_desc, newest",
+              "default": "price_asc",
+              "title": "Sort By"
+            },
+            "description": "Criterio de orden: price_asc, price_desc, sqm_asc, sqm_desc, price_sqm_asc, price_sqm_desc, newest"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Número de página (1-indexed)",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Número de página (1-indexed)"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Elementos por página",
+              "default": 20,
+              "title": "Page Size"
+            },
+            "description": "Elementos por página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedPropertiesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}": {
+      "get": {
+        "tags": [
+          "Properties"
+        ],
+        "summary": "Detalle completo de una vivienda con su tasación por Machine Learning",
+        "operationId": "get_property_by_id_api_v1_properties__property_id__get",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats/neighborhoods": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Métricas agregadas y dispersión de precios por barrio",
+        "operationId": "get_neighborhood_stats_api_v1_stats_neighborhoods_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NeighborhoodStats"
+                  },
+                  "type": "array",
+                  "title": "Response Get Neighborhood Stats Api V1 Stats Neighborhoods Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats/market-summary": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Resumen global del mercado inmobiliario en A Coruña",
+        "operationId": "get_market_summary_api_v1_stats_market_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/valuation/predict": {
+      "post": {
+        "tags": [
+          "Valuation"
+        ],
+        "summary": "Simulador interactivo de tasación de alquiler con veredicto de oportunidad",
+        "operationId": "predict_rental_price_api_v1_valuation_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValuationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValuationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "API operational status",
+            "default": "ok"
+          },
+          "app_name": {
+            "type": "string",
+            "title": "App Name",
+            "default": "A Coruña Rental Market Intelligence API"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "1.0.0"
+          },
+          "total_listings": {
+            "type": "integer",
+            "title": "Total Listings",
+            "description": "Number of processed rental records available"
+          },
+          "model_loaded": {
+            "type": "boolean",
+            "title": "Model Loaded",
+            "description": "Flag indicating if the ML valuation model is loaded"
+          },
+          "model_metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Metrics",
+            "description": "Evaluation metrics of the loaded ML model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_listings",
+          "model_loaded"
+        ],
+        "title": "HealthResponse"
+      },
+      "MarketSummaryResponse": {
+        "properties": {
+          "total_properties": {
+            "type": "integer",
+            "title": "Total Properties",
+            "description": "Total de inmuebles en la muestra"
+          },
+          "avg_price": {
+            "type": "number",
+            "title": "Avg Price",
+            "description": "Precio medio global de alquiler mensual"
+          },
+          "median_price": {
+            "type": "number",
+            "title": "Median Price",
+            "description": "Precio mediano global de alquiler mensual"
+          },
+          "min_price": {
+            "type": "number",
+            "title": "Min Price",
+            "description": "Precio mínimo registrado"
+          },
+          "max_price": {
+            "type": "number",
+            "title": "Max Price",
+            "description": "Precio máximo registrado"
+          },
+          "avg_price_sqm": {
+            "type": "number",
+            "title": "Avg Price Sqm",
+            "description": "Precio medio global por metro cuadrado (€/m²)"
+          },
+          "median_price_sqm": {
+            "type": "number",
+            "title": "Median Price Sqm",
+            "description": "Precio mediano global por metro cuadrado (€/m²)"
+          },
+          "most_expensive_neighborhoods": {
+            "items": {
+              "$ref": "#/components/schemas/NeighborhoodStats"
+            },
+            "type": "array",
+            "title": "Most Expensive Neighborhoods",
+            "description": "Top 3 barrios con mayor €/m²"
+          },
+          "cheapest_neighborhoods": {
+            "items": {
+              "$ref": "#/components/schemas/NeighborhoodStats"
+            },
+            "type": "array",
+            "title": "Cheapest Neighborhoods",
+            "description": "Top 3 barrios con menor €/m²"
+          },
+          "property_type_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Property Type Distribution",
+            "description": "Distribución por tipología de vivienda"
+          },
+          "amenities_pct": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Amenities Pct",
+            "description": "Porcentajes de comodidades (% ascensor, parking, etc.)"
+          },
+          "model_metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Metrics",
+            "description": "Métricas del modelo de tasación ML"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_properties",
+          "avg_price",
+          "median_price",
+          "min_price",
+          "max_price",
+          "avg_price_sqm",
+          "median_price_sqm",
+          "most_expensive_neighborhoods",
+          "cheapest_neighborhoods",
+          "property_type_distribution",
+          "amenities_pct"
+        ],
+        "title": "MarketSummaryResponse"
+      },
+      "NeighborhoodStats": {
+        "properties": {
+          "neighborhood_id": {
+            "type": "string",
+            "title": "Neighborhood Id",
+            "description": "Identificador slug del barrio"
+          },
+          "neighborhood": {
+            "type": "string",
+            "title": "Neighborhood",
+            "description": "Nombre descriptivo del barrio"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "description": "Número de ofertas registradas en este barrio"
+          },
+          "avg_price": {
+            "type": "number",
+            "title": "Avg Price",
+            "description": "Precio mensual medio en euros"
+          },
+          "median_price": {
+            "type": "number",
+            "title": "Median Price",
+            "description": "Mediana del precio mensual"
+          },
+          "min_price": {
+            "type": "number",
+            "title": "Min Price",
+            "description": "Precio mensual mínimo"
+          },
+          "max_price": {
+            "type": "number",
+            "title": "Max Price",
+            "description": "Precio mensual máximo"
+          },
+          "avg_price_sqm": {
+            "type": "number",
+            "title": "Avg Price Sqm",
+            "description": "Precio medio por metro cuadrado (€/m²)"
+          },
+          "median_price_sqm": {
+            "type": "number",
+            "title": "Median Price Sqm",
+            "description": "Mediana del precio por metro cuadrado (€/m²)"
+          },
+          "std_price": {
+            "type": "number",
+            "title": "Std Price",
+            "description": "Desviación típica del precio (dispersión)"
+          },
+          "avg_sqm": {
+            "type": "number",
+            "title": "Avg Sqm",
+            "description": "Superficie media en m²"
+          }
+        },
+        "type": "object",
+        "required": [
+          "neighborhood_id",
+          "neighborhood",
+          "count",
+          "avg_price",
+          "median_price",
+          "min_price",
+          "max_price",
+          "avg_price_sqm",
+          "median_price_sqm",
+          "std_price",
+          "avg_sqm"
+        ],
+        "title": "NeighborhoodStats"
+      },
+      "PaginatedPropertiesResponse": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total de propiedades que coinciden con los filtros"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Página actual (1-indexed)"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size",
+            "description": "Elementos por página"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "description": "Total de páginas disponibles"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PropertyResponse"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Listado de inmuebles de la página"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "page",
+          "page_size",
+          "total_pages",
+          "items"
+        ],
+        "title": "PaginatedPropertiesResponse"
+      },
+      "PropertyDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "ID único del inmueble"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Título de la publicación"
+          },
+          "neighborhood": {
+            "type": "string",
+            "title": "Neighborhood",
+            "description": "Nombre del barrio"
+          },
+          "neighborhood_id": {
+            "type": "string",
+            "title": "Neighborhood Id",
+            "description": "Identificador slug del barrio"
+          },
+          "price_month": {
+            "type": "integer",
+            "title": "Price Month",
+            "description": "Precio mensual en euros (€/mes)"
+          },
+          "sqm": {
+            "type": "integer",
+            "title": "Sqm",
+            "description": "Superficie en m²"
+          },
+          "rooms": {
+            "type": "integer",
+            "title": "Rooms",
+            "description": "Número de habitaciones"
+          },
+          "bathrooms": {
+            "type": "integer",
+            "title": "Bathrooms",
+            "description": "Número de baños"
+          },
+          "floor": {
+            "type": "string",
+            "title": "Floor",
+            "description": "Planta del inmueble"
+          },
+          "has_elevator": {
+            "type": "boolean",
+            "title": "Has Elevator",
+            "description": "Tiene ascensor"
+          },
+          "is_exterior": {
+            "type": "boolean",
+            "title": "Is Exterior",
+            "description": "Es exterior"
+          },
+          "furnished": {
+            "type": "boolean",
+            "title": "Furnished",
+            "description": "Amueblado"
+          },
+          "has_parking": {
+            "type": "boolean",
+            "title": "Has Parking",
+            "description": "Tiene plaza de garaje"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat",
+            "description": "Latitud"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon",
+            "description": "Longitud"
+          },
+          "price_sqm": {
+            "type": "number",
+            "title": "Price Sqm",
+            "description": "Precio por m² (€/m²)"
+          },
+          "property_type": {
+            "type": "string",
+            "title": "Property Type",
+            "description": "Tipo de propiedad"
+          },
+          "is_outlier": {
+            "type": "boolean",
+            "title": "Is Outlier",
+            "description": "Indica si es un valor atípico simulado"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "Fecha de publicación ISO 8601"
+          },
+          "valuation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ValuationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Tasación y veredicto de mercado calculados automáticamente por el modelo ML"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "neighborhood",
+          "neighborhood_id",
+          "price_month",
+          "sqm",
+          "rooms",
+          "bathrooms",
+          "floor",
+          "has_elevator",
+          "is_exterior",
+          "furnished",
+          "has_parking",
+          "lat",
+          "lon",
+          "price_sqm",
+          "property_type",
+          "is_outlier",
+          "created_at"
+        ],
+        "title": "PropertyDetailResponse"
+      },
+      "PropertyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "ID único del inmueble"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Título de la publicación"
+          },
+          "neighborhood": {
+            "type": "string",
+            "title": "Neighborhood",
+            "description": "Nombre del barrio"
+          },
+          "neighborhood_id": {
+            "type": "string",
+            "title": "Neighborhood Id",
+            "description": "Identificador slug del barrio"
+          },
+          "price_month": {
+            "type": "integer",
+            "title": "Price Month",
+            "description": "Precio mensual en euros (€/mes)"
+          },
+          "sqm": {
+            "type": "integer",
+            "title": "Sqm",
+            "description": "Superficie en m²"
+          },
+          "rooms": {
+            "type": "integer",
+            "title": "Rooms",
+            "description": "Número de habitaciones"
+          },
+          "bathrooms": {
+            "type": "integer",
+            "title": "Bathrooms",
+            "description": "Número de baños"
+          },
+          "floor": {
+            "type": "string",
+            "title": "Floor",
+            "description": "Planta del inmueble"
+          },
+          "has_elevator": {
+            "type": "boolean",
+            "title": "Has Elevator",
+            "description": "Tiene ascensor"
+          },
+          "is_exterior": {
+            "type": "boolean",
+            "title": "Is Exterior",
+            "description": "Es exterior"
+          },
+          "furnished": {
+            "type": "boolean",
+            "title": "Furnished",
+            "description": "Amueblado"
+          },
+          "has_parking": {
+            "type": "boolean",
+            "title": "Has Parking",
+            "description": "Tiene plaza de garaje"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat",
+            "description": "Latitud"
+          },
+          "lon": {
+            "type": "number",
+            "title": "Lon",
+            "description": "Longitud"
+          },
+          "price_sqm": {
+            "type": "number",
+            "title": "Price Sqm",
+            "description": "Precio por m² (€/m²)"
+          },
+          "property_type": {
+            "type": "string",
+            "title": "Property Type",
+            "description": "Tipo de propiedad"
+          },
+          "is_outlier": {
+            "type": "boolean",
+            "title": "Is Outlier",
+            "description": "Indica si es un valor atípico simulado"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "Fecha de publicación ISO 8601"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "neighborhood",
+          "neighborhood_id",
+          "price_month",
+          "sqm",
+          "rooms",
+          "bathrooms",
+          "floor",
+          "has_elevator",
+          "is_exterior",
+          "furnished",
+          "has_parking",
+          "lat",
+          "lon",
+          "price_sqm",
+          "property_type",
+          "is_outlier",
+          "created_at"
+        ],
+        "title": "PropertyResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "ValuationRequest": {
+        "properties": {
+          "sqm": {
+            "type": "number",
+            "maximum": 500.0,
+            "exclusiveMinimum": 10.0,
+            "title": "Sqm",
+            "description": "Superficie construida/útil de la vivienda en m²",
+            "examples": [
+              85.0
+            ]
+          },
+          "rooms": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Rooms",
+            "description": "Número de dormitorios / habitaciones",
+            "default": 2,
+            "examples": [
+              2
+            ]
+          },
+          "bathrooms": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Bathrooms",
+            "description": "Número de cuartos de baño",
+            "default": 1,
+            "examples": [
+              1
+            ]
+          },
+          "neighborhood_id": {
+            "type": "string",
+            "title": "Neighborhood Id",
+            "description": "Identificador del barrio en A Coruña (slug, ej. 'pescaderia_ensanche', 'monte_alto', 'cuatro_caminos')",
+            "examples": [
+              "pescaderia_ensanche"
+            ]
+          },
+          "has_elevator": {
+            "type": "boolean",
+            "title": "Has Elevator",
+            "description": "Dispone de ascensor",
+            "default": true,
+            "examples": [
+              true
+            ]
+          },
+          "has_parking": {
+            "type": "boolean",
+            "title": "Has Parking",
+            "description": "Dispone de plaza de garaje incluida",
+            "default": false,
+            "examples": [
+              false
+            ]
+          },
+          "furnished": {
+            "type": "boolean",
+            "title": "Furnished",
+            "description": "Se alquila amueblado",
+            "default": false,
+            "examples": [
+              false
+            ]
+          },
+          "is_exterior": {
+            "type": "boolean",
+            "title": "Is Exterior",
+            "description": "Vivienda exterior con luz natural",
+            "default": true,
+            "examples": [
+              true
+            ]
+          },
+          "property_type": {
+            "type": "string",
+            "title": "Property Type",
+            "description": "Tipología ('piso', 'apartamento', 'estudio', 'duplex', 'atico')",
+            "default": "piso",
+            "examples": [
+              "piso"
+            ]
+          },
+          "offered_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offered Price",
+            "description": "Precio mensual de oferta a evaluar (€/mes). Si se proporciona, se calcula veredicto y desviación.",
+            "examples": [
+              950.0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "sqm",
+          "neighborhood_id"
+        ],
+        "title": "ValuationRequest",
+        "example": {
+          "bathrooms": 1,
+          "furnished": true,
+          "has_elevator": true,
+          "has_parking": false,
+          "is_exterior": true,
+          "neighborhood_id": "pescaderia_ensanche",
+          "offered_price": 950.0,
+          "property_type": "piso",
+          "rooms": 2,
+          "sqm": 85.0
+        }
+      },
+      "ValuationResponse": {
+        "properties": {
+          "predicted_price": {
+            "type": "number",
+            "title": "Predicted Price",
+            "description": "Precio estimado de mercado mensual en EUR (€/mes)"
+          },
+          "price_range_min": {
+            "type": "number",
+            "title": "Price Range Min",
+            "description": "Límite inferior del rango de confianza estimado (-10%)"
+          },
+          "price_range_max": {
+            "type": "number",
+            "title": "Price Range Max",
+            "description": "Límite superior del rango de confianza estimado (+10%)"
+          },
+          "predicted_price_sqm": {
+            "type": "number",
+            "title": "Predicted Price Sqm",
+            "description": "Precio estimado por metro cuadrado (€/m²)"
+          },
+          "market_verdict": {
+            "type": "string",
+            "title": "Market Verdict",
+            "description": "Diagnóstico comparativo: 'Oportunidad / Muy buen precio', 'Precio de mercado', o 'Sobreprecio'"
+          },
+          "deviation_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deviation Pct",
+            "description": "Porcentaje de desviación del precio ofertado respecto al valor de mercado estimado"
+          },
+          "offered_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offered Price",
+            "description": "Precio ofertado evaluado (€/mes)"
+          },
+          "neighborhood_id": {
+            "type": "string",
+            "title": "Neighborhood Id",
+            "description": "Barrio tasado"
+          },
+          "sqm": {
+            "type": "number",
+            "title": "Sqm",
+            "description": "Metros cuadrados tasados"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version",
+            "description": "Versión del pipeline de tasación",
+            "default": "1.0.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "predicted_price",
+          "price_range_min",
+          "price_range_max",
+          "predicted_price_sqm",
+          "market_verdict",
+          "neighborhood_id",
+          "sqm"
+        ],
+        "title": "ValuationResponse"
+      }
+    }
+  }
+}
