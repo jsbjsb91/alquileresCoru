@@ -5,7 +5,7 @@
 
 // Global State
 const state = {
-  apiBaseUrl: window.location.origin.includes('8000') ? window.location.origin : 'http://127.0.0.1:8000',
+  apiBaseUrl: (window.location.protocol === 'file:') ? 'http://127.0.0.1:8000' : (window.location.origin || ''),
   isOnline: false,
   allProperties: [],
   filteredProperties: [],
@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupSimulator();
   await loadInitialData();
   applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
   if (window.lucide) {
     lucide.createIcons();
   }
@@ -116,10 +119,10 @@ async function loadInitialData() {
 
     // Load from local fallback files
     try {
-      const localProps = await fetch('data/properties_fallback.json');
+      const localProps = await fetch(`${state.apiBaseUrl}/data/properties_fallback.json`);
       state.allProperties = await localProps.json();
 
-      const localSum = await fetch('data/market_summary.json');
+      const localSum = await fetch(`${state.apiBaseUrl}/data/market_summary.json`);
       state.marketSummary = await localSum.json();
     } catch (localErr) {
       console.error('Failed to load local fallback data:', localErr);
@@ -168,6 +171,9 @@ function setupFilterListeners() {
     realToggle.addEventListener('change', (e) => {
       state.filters.is_real = e.target.checked;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -177,6 +183,9 @@ function setupFilterListeners() {
     nSelect.addEventListener('change', (e) => {
       state.filters.neighborhood_id = e.target.value;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -186,6 +195,9 @@ function setupFilterListeners() {
     vSelect.addEventListener('change', (e) => {
       state.filters.verdict = e.target.value;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -200,6 +212,9 @@ function setupFilterListeners() {
         priceLabel.innerText = val >= 3000 ? 'Sin límite' : `Hasta ${val} €/mes`;
       }
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -217,6 +232,9 @@ function setupFilterListeners() {
       const r = btn.getAttribute('data-rooms');
       state.filters.rooms = r ? parseInt(r) : null;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   });
 
@@ -226,6 +244,9 @@ function setupFilterListeners() {
     elElevator.addEventListener('change', (e) => {
       state.filters.has_elevator = e.target.checked;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -234,6 +255,9 @@ function setupFilterListeners() {
     elParking.addEventListener('change', (e) => {
       state.filters.has_parking = e.target.checked;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -242,6 +266,9 @@ function setupFilterListeners() {
     elFurnished.addEventListener('change', (e) => {
       state.filters.furnished = e.target.checked;
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -262,6 +289,9 @@ function setupFilterListeners() {
         label.innerText = textMap[e.target.value] || e.target.value;
       }
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 
@@ -301,6 +331,9 @@ function setupFilterListeners() {
       });
 
       applyFiltersAndRender();
+  if (state.map) {
+    setTimeout(() => state.map.invalidateSize(), 300);
+  }
     });
   }
 }
