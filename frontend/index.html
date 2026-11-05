@@ -240,27 +240,51 @@
       </div>
 
       <!-- Controls row -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-        <!-- Neighborhood -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-5">
+        <!-- Concello / Municipio -->
         <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Barrio de A Coruña</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <i data-lucide="map" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Concello</span>
+          </label>
+          <select id="filter-concello" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+            <option value="">Todos los concellos</option>
+            <option value="A Coruña">A Coruña (Capital)</option>
+            <option value="Oleiros">Concello de Oleiros</option>
+            <option value="Culleredo">Concello de Culleredo</option>
+            <option value="Arteixo">Concello de Arteixo</option>
+            <option value="Cambre">Concello de Cambre</option>
+            <option value="Sada">Concello de Sada</option>
+          </select>
+        </div>
+
+        <!-- Neighborhood / Zona -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Barrio / Zona</span>
+          </label>
           <select id="filter-neighborhood" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
-            <option value="">Todos los barrios</option>
-            <option value="pescaderia_ensanche">Pescadería - Ensanche - Cantones</option>
-            <option value="monte_alto">Monte Alto - Zalaeta - Orzán</option>
-            <option value="riazor_ciudad_jardin">Riazor - Los Rosales - Ciudad Jardín</option>
-            <option value="cuatro_caminos">Cuatro Caminos - Nuevos Ministerios</option>
-            <option value="ciudad_vieja">Ciudad Vieja</option>
-            <option value="los_mallos">Los Mallos - Estación</option>
-            <option value="sagrada_familia">Sagrada Familia</option>
-            <option value="elvina">Elviña - Castro - Barrio de las Flores</option>
-            <option value="matogrande">Matogrande - Eirís</option>
-            <option value="agras_del_orzán">Agra del Orzán - Ventorrillo</option>
-                      <option value="oleiros">Concello de Oleiros (Santa Cruz - Perillo - Mera)</option>
-            <option value="culleredo">Concello de Culleredo (O Burgo - Vilaboa)</option>
-            <option value="arteixo">Concello de Arteixo (Meicende - Pastoriza)</option>
-            <option value="cambre">Concello de Cambre (O Temple - El Graxal)</option>
-            <option value="sada">Concello de Sada (Sada - Fontán - Carnoedo)</option>
+            <option value="">Todos los barrios y zonas</option>
+            <optgroup label="A Coruña Capital" id="optgroup-coruna">
+              <option value="pescaderia_ensanche">Pescadería - Ensanche - Cantones</option>
+              <option value="monte_alto">Monte Alto - Zalaeta - Orzán</option>
+              <option value="riazor_ciudad_jardin">Riazor - Los Rosales - Ciudad Jardín</option>
+              <option value="cuatro_caminos">Cuatro Caminos - Nuevos Ministerios</option>
+              <option value="ciudad_vieja">Ciudad Vieja</option>
+              <option value="los_mallos">Los Mallos - Estación</option>
+              <option value="sagrada_familia">Sagrada Familia</option>
+              <option value="elvina">Elviña - Castro - Flores</option>
+              <option value="matogrande">Matogrande - Eirís</option>
+              <option value="agras_del_orzán">Agra del Orzán - Ventorrillo</option>
+            </optgroup>
+            <optgroup label="Área Metropolitana" id="optgroup-metrop">
+              <option value="oleiros">Oleiros (Santa Cruz - Perillo - Mera)</option>
+              <option value="culleredo">Culleredo (O Burgo - Vilaboa - Acea)</option>
+              <option value="arteixo">Arteixo (Meicende - Pastoriza - Sabón)</option>
+              <option value="cambre">Cambre (O Temple - El Graxal)</option>
+              <option value="sada">Sada (Sada Centro - Fontán)</option>
+            </optgroup>
           </select>
         </div>
 

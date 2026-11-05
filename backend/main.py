@@ -38,6 +38,22 @@ _PROPERTIES_BY_ID: Dict[str, Dict[str, Any]] = {}
 
 REAL_DATA_PARQUET = Path(__file__).resolve().parent.parent / "data" / "processed" / "alquileres_coruna_reales.parquet"
 
+MUNICIPALITY_MAP = {
+    "oleiros": "Oleiros",
+    "culleredo": "Culleredo",
+    "arteixo": "Arteixo",
+    "cambre": "Cambre",
+    "sada": "Sada",
+}
+
+def resolve_municipality(nid: str) -> str:
+    s = str(nid).lower()
+    for k, v in MUNICIPALITY_MAP.items():
+        if k in s:
+            return v
+    return "A Coruña"
+
+
 def get_properties_df() -> pd.DataFrame:
     """Return in-memory cached properties DataFrame combining real & benchmark data."""
     global _DF_PROPERTIES, _PROPERTIES_BY_ID
@@ -64,8 +80,10 @@ def get_properties_df() -> pd.DataFrame:
             df_real["has_elevator"] = df_real["has_elevator"].fillna(True).astype(bool) if "has_elevator" in df_real.columns else True
             df_real["is_real"] = True
             df = pd.concat([df_real, df_bench], ignore_index=True)
+            df["municipality"] = df["neighborhood_id"].apply(resolve_municipality)
         else:
             df = df_bench
+            df["municipality"] = df["neighborhood_id"].apply(resolve_municipality)
 
         # Compute ML Valuation and Market Verdicts for all listings
         try:
@@ -161,6 +179,26 @@ def health_check() -> HealthResponse:
 
 
 @app.get(
+    "/api/v1/municipalities",
+    response_model=List[Dict[str, Any]],
+    tags=["Metadata"],
+    summary="Listado de concellos del área metropolitana y total de viviendas",
+)
+def list_municipalities() -> List[Dict[str, Any]]:
+    df = get_properties_df()
+    counts = df["municipality"].value_counts().to_dict()
+    result = [
+        {"id": "coruna", "name": "A Coruña", "count": counts.get("A Coruña", 0)},
+        {"id": "oleiros", "name": "Oleiros", "count": counts.get("Oleiros", 0)},
+        {"id": "culleredo", "name": "Culleredo", "count": counts.get("Culleredo", 0)},
+        {"id": "arteixo", "name": "Arteixo", "count": counts.get("Arteixo", 0)},
+        {"id": "cambre", "name": "Cambre", "count": counts.get("Cambre", 0)},
+        {"id": "sada", "name": "Sada", "count": counts.get("Sada", 0)},
+    ]
+    return result
+
+
+@app.get(
     "/api/v1/neighborhoods",
     response_model=List[Dict[str, str]],
     tags=["Metadata"],
@@ -184,6 +222,7 @@ def list_neighborhoods() -> List[Dict[str, str]]:
     summary="Consulta de listado de viviendas con filtrado y paginación",
 )
 def get_properties(
+    municipality: Annotated[Optional[str], Query(description="Filtrar por concello (ej: A Coruña, Oleiros, Culleredo, Arteixo, Cambre, Sada)")] = None,
     neighborhood_id: Annotated[Optional[str], Query(description="Filtrar por slug de barrio")] = None,
     min_price: Annotated[Optional[int], Query(ge=0, description="Precio mínimo mensual (€)")] = None,
     max_price: Annotated[Optional[int], Query(ge=0, description="Precio máximo mensual (€)")] = None,
@@ -208,6 +247,8 @@ def get_properties(
     df = get_properties_df().copy()
 
     # Apply filters
+    if municipality:
+        df = df[df["municipality"].str.lower() == municipality.lower()]
     if neighborhood_id:
         df = df[df["neighborhood_id"] == neighborhood_id]
     if min_price is not None:

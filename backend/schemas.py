@@ -85,6 +85,7 @@ class PropertyResponse(BaseModel):
     title: str = Field(..., description="Título de la publicación")
     neighborhood: str = Field(..., description="Nombre del barrio")
     neighborhood_id: str = Field(..., description="Identificador slug del barrio")
+    municipality: str = Field(default="A Coruña", description="Concello o municipio de la vivienda")
     price_month: float = Field(..., description="Precio mensual en euros (€/mes)")
     sqm: float = Field(..., description="Superficie en m²")
     rooms: int = Field(..., description="Número de habitaciones")

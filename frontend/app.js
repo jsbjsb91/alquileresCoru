@@ -1,3 +1,26 @@
+
+// Coordinates center by Concello
+const CONCELLO_COORDS = {
+  'A Coruña': { coords: [43.3650, -8.4100], zoom: 13 },
+  'Oleiros': { coords: [43.3410, -8.3320], zoom: 13 },
+  'Culleredo': { coords: [43.3150, -8.3880], zoom: 13 },
+  'Arteixo': { coords: [43.3050, -8.5080], zoom: 13 },
+  'Cambre': { coords: [43.2950, -8.3440], zoom: 13 },
+  'Sada': { coords: [43.3510, -8.2540], zoom: 13 },
+  '': { coords: [43.3380, -8.3750], zoom: 12 }
+};
+
+function getPropertyMunicipality(p) {
+  if (p.municipality) return p.municipality;
+  const nid = (p.neighborhood_id || '').toLowerCase();
+  if (nid.includes('oleiros')) return 'Oleiros';
+  if (nid.includes('culleredo')) return 'Culleredo';
+  if (nid.includes('arteixo')) return 'Arteixo';
+  if (nid.includes('cambre')) return 'Cambre';
+  if (nid.includes('sada')) return 'Sada';
+  return 'A Coruña';
+}
+
 /**
  * Alquileres Coruña — Frontend Application Logic
  * Integración con FastAPI, Leaflet.js y Machine Learning Valuation Pipeline
@@ -16,6 +39,7 @@ const state = {
   markersById: {},
   filters: {
     is_real: true, // Default: Real listings only
+    municipality: '', // Concello filter
     verdict: '',
     neighborhood_id: '',
     max_price: 3000,
@@ -176,15 +200,61 @@ function setupFilterListeners() {
     });
   }
 
+  // Concello filter
+  const concelloSelect = document.getElementById('filter-concello');
+  if (concelloSelect) {
+    concelloSelect.addEventListener('change', (e) => {
+      const selectedMuni = e.target.value;
+      state.filters.municipality = selectedMuni;
+
+      // Filter or reset neighborhood selector if conflict
+      const nSelect = document.getElementById('filter-neighborhood');
+      if (nSelect && state.filters.neighborhood_id) {
+        // If the selected neighborhood doesn't belong to the concello, reset neighborhood filter
+        const isMetrop = ['oleiros', 'culleredo', 'arteixo', 'cambre', 'sada'].includes(state.filters.neighborhood_id);
+        if (selectedMuni === 'A Coruña' && isMetrop) {
+          state.filters.neighborhood_id = '';
+          nSelect.value = '';
+        } else if (selectedMuni && selectedMuni !== 'A Coruña' && !isMetrop) {
+          state.filters.neighborhood_id = '';
+          nSelect.value = '';
+        }
+      }
+
+      // Fly map to selected concello
+      if (state.map && CONCELLO_COORDS[selectedMuni]) {
+        const { coords, zoom } = CONCELLO_COORDS[selectedMuni];
+        state.map.flyTo(coords, zoom, { duration: 1.0 });
+      }
+
+      applyFiltersAndRender();
+      if (state.map) {
+        setTimeout(() => state.map.invalidateSize(), 300);
+      }
+    });
+  }
+
   // Neighborhood filter
   const nSelect = document.getElementById('filter-neighborhood');
   if (nSelect) {
     nSelect.addEventListener('change', (e) => {
       state.filters.neighborhood_id = e.target.value;
+      // Auto-sync concello filter if specific neighborhood chosen
+      if (e.target.value) {
+        const isMetrop = ['oleiros', 'culleredo', 'arteixo', 'cambre', 'sada'].includes(e.target.value);
+        if (isMetrop && concelloSelect) {
+          const mapMuni = { 'oleiros': 'Oleiros', 'culleredo': 'Culleredo', 'arteixo': 'Arteixo', 'cambre': 'Cambre', 'sada': 'Sada' };
+          concelloSelect.value = mapMuni[e.target.value] || '';
+          state.filters.municipality = concelloSelect.value;
+        } else if (!isMetrop && concelloSelect) {
+          concelloSelect.value = 'A Coruña';
+          state.filters.municipality = 'A Coruña';
+        }
+      }
       applyFiltersAndRender();
-  if (state.map) {
-    setTimeout(() => state.map.invalidateSize(), 300);
-  }
+      if (state.map) {
+        setTimeout(() => state.map.invalidateSize(), 300);
+      }
     });
   }
 
@@ -300,6 +370,7 @@ function setupFilterListeners() {
     resetBtn.addEventListener('click', () => {
       state.filters = {
         is_real: true,
+        municipality: '',
         verdict: '',
         neighborhood_id: '',
         max_price: 3000,
@@ -310,6 +381,7 @@ function setupFilterListeners() {
         sort_by: 'opportunity',
       };
       if (realToggle) realToggle.checked = true;
+      if (concelloSelect) concelloSelect.value = '';
       if (nSelect) nSelect.value = '';
       if (vSelect) vSelect.value = '';
       if (priceSlider) priceSlider.value = 3000;
@@ -346,6 +418,14 @@ function applyFiltersAndRender() {
   // 1. Real only
   if (state.filters.is_real) {
     list = list.filter(p => p.is_real === true);
+  }
+
+  // 1b. Concello / Municipio filter
+  if (state.filters.municipality) {
+    list = list.filter(p => {
+      const muni = getPropertyMunicipality(p).toLowerCase();
+      return muni === state.filters.municipality.toLowerCase();
+    });
   }
 
   // 2. Neighborhood
@@ -478,7 +558,7 @@ function renderMapMarkers(properties) {
         </div>
 
         <div class="p-3.5">
-          <div class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">${p.neighborhood}</div>
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700"><strong>${getPropertyMunicipality(p)}</strong> &bull; ${p.neighborhood}</div>
           <h4 class="text-sm font-bold text-slate-900 line-clamp-1 mt-0.5">${p.title}</h4>
 
           <div class="flex items-baseline justify-between mt-2.5 pb-2.5 border-b border-slate-100">
@@ -638,10 +718,11 @@ function renderPropertyCards(properties) {
         <!-- Card Body -->
         <div class="p-5 flex-1 flex flex-col justify-between">
           <div>
-            <!-- Neighborhood -->
+            <!-- Concello & Neighborhood -->
             <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
               <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600"></i>
-              <span>${p.neighborhood}</span>
+              <span class="bg-emerald-100/70 text-emerald-800 px-1.5 py-0.5 rounded text-[10px] font-extrabold mr-1">${getPropertyMunicipality(p)}</span>
+              <span class="truncate">${p.neighborhood}</span>
             </div>
 
             <!-- Title -->
