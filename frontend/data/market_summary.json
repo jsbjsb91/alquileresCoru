@@ -1,11 +1,11 @@
 {
-  "total_properties": 900,
-  "avg_price": 1140.44,
+  "total_properties": 933,
+  "avg_price": 1140.58,
   "median_price": 1010.0,
-  "min_price": 380.0,
-  "max_price": 5000.0,
-  "avg_price_sqm": 13.31,
-  "median_price_sqm": 12.94,
+  "min_price": 270.0,
+  "max_price": 8000.0,
+  "avg_price_sqm": 13.23,
+  "median_price_sqm": 12.84,
   "most_expensive_neighborhoods": [
     {
       "neighborhood_id": "pescaderia_ensanche",
@@ -34,17 +34,17 @@
       "avg_sqm": 85.56
     },
     {
-      "neighborhood_id": "ciudad_vieja",
-      "neighborhood": "Ciudad Vieja",
-      "count": 23,
-      "avg_price": 1216.96,
-      "median_price": 1000.0,
-      "min_price": 600.0,
-      "max_price": 2500.0,
-      "avg_price_sqm": 14.93,
-      "median_price_sqm": 14.62,
-      "std_price": 550.84,
-      "avg_sqm": 82.74
+      "neighborhood_id": "oleiros",
+      "neighborhood": "Concello de Oleiros (Santa Cruz - Perillo - Mera)",
+      "count": 18,
+      "avg_price": 1674.44,
+      "median_price": 1150.0,
+      "min_price": 750.0,
+      "max_price": 5000.0,
+      "avg_price_sqm": 15.35,
+      "median_price_sqm": 14.55,
+      "std_price": 1318.93,
+      "avg_sqm": 110.56
     }
   ],
   "cheapest_neighborhoods": [
@@ -62,6 +62,19 @@
       "avg_sqm": 88.18
     },
     {
+      "neighborhood_id": "arteixo",
+      "neighborhood": "Concello de Arteixo (Meicende - Pastoriza - Centro)",
+      "count": 11,
+      "avg_price": 854.55,
+      "median_price": 840.0,
+      "min_price": 620.0,
+      "max_price": 1200.0,
+      "avg_price_sqm": 10.14,
+      "median_price_sqm": 10.0,
+      "std_price": 180.8,
+      "avg_sqm": 86.18
+    },
+    {
       "neighborhood_id": "mesoiro_pocomaco",
       "neighborhood": "Novo Mesoiro - Feáns - Vioño",
       "count": 49,
@@ -73,33 +86,20 @@
       "median_price_sqm": 10.18,
       "std_price": 294.41,
       "avg_sqm": 89.92
-    },
-    {
-      "neighborhood_id": "castros_castrillon",
-      "neighborhood": "Os Castros - Castrillón",
-      "count": 58,
-      "avg_price": 859.31,
-      "median_price": 735.0,
-      "min_price": 390.0,
-      "max_price": 2400.0,
-      "avg_price_sqm": 10.42,
-      "median_price_sqm": 10.3,
-      "std_price": 442.96,
-      "avg_sqm": 83.17
     }
   ],
   "property_type_distribution": {
-    "piso": 663,
+    "piso": 696,
     "apartamento": 123,
     "estudio": 61,
     "duplex": 38,
     "atico": 15
   },
   "amenities_pct": {
-    "pct_elevator": 80.22,
-    "pct_parking": 33.78,
-    "pct_furnished": 65.78,
-    "pct_exterior": 84.89
+    "pct_elevator": 80.92,
+    "pct_parking": 33.12,
+    "pct_furnished": 63.77,
+    "pct_exterior": 85.42
   },
   "model_metrics": {
     "r2": 0.9381,

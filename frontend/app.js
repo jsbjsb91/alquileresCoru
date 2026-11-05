@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 function initMap() {
   // Center in A Coruña city center
-  const corunaCoords = [43.3623, -8.4115];
+  const corunaCoords = [43.3380, -8.3750];
   state.map = L.map('coruna-map', {
     center: corunaCoords,
-    zoom: 13,
+    zoom: 12,
     scrollWheelZoom: true,
   });
 
@@ -73,7 +73,7 @@ function initMap() {
   const recenterBtn = document.getElementById('btn-recenter-map');
   if (recenterBtn) {
     recenterBtn.addEventListener('click', () => {
-      state.map.flyTo(corunaCoords, 13, { duration: 1.2 });
+      state.map.flyTo(corunaCoords, 12, { duration: 1.2 });
     });
   }
 }

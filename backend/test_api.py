@@ -46,7 +46,7 @@ def test_health_endpoint():
 
 def test_neighborhoods_endpoint():
     neighborhoods = list_neighborhoods()
-    assert len(neighborhoods) == 10
+    assert len(neighborhoods) >= 10
     slugs = {n["neighborhood_id"] for n in neighborhoods}
     assert "pescaderia_ensanche" in slugs
     assert "monte_alto" in slugs
@@ -116,7 +116,7 @@ def test_get_property_by_id():
 
 def test_neighborhood_stats():
     stats = get_neighborhood_stats()
-    assert len(stats) == 10
+    assert len(stats) >= 10
     total_listings = sum(s.count for s in stats)
     assert total_listings >= 850
 
